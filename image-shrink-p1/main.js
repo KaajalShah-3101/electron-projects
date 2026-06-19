@@ -7,6 +7,7 @@ const isDev = process.env.NODE_ENV !== 'production' ? true : false
 const isMac  = process.platform === 'darwin' ? true : false
 
 let mainWindow
+let aboutWindow
 
 function createMainWindow() {
     mainWindow = new BrowserWindow({
@@ -15,9 +16,23 @@ function createMainWindow() {
         height: 600,
         icon: `${__dirname}/assets/icons/Icon_256x256.png`,
         resizable: isDev ? true : false,
+        backgroundColor: 'white',
     })
 
     mainWindow.loadURL(`file://${__dirname}/app/index.html`)
+}
+
+function createAboutWindow() {
+    aboutWindow = new BrowserWindow({
+        title: 'About ImageShrink',
+        width: 300, 
+        height: 300,
+        icon: `${__dirname}/assets/icons/Icon_256x256.png`,
+        resizable: false,
+        backgroundColor: 'white',
+    })
+
+    aboutWindow.loadURL(`file://${__dirname}/app/about.html`)
 }
 
 
@@ -37,20 +52,46 @@ app.on('ready', () => {
     createMainWindow()
     const mainMenu = Menu.buildFromTemplate(menu)
     Menu.setApplicationMenu(mainMenu)
+
     mainWindow.on('closed', () => mainWindow = null)
 })
 
 const menu = [
     ...(isMac ? [
-        { role: 'appMenu' }] : []),
+        { 
+            label: app.name,
+            submenu: [
+                {
+                    label: 'About',
+                    click: createAboutWindow
+                }
+            ]
+         }] : []),
     {
-        label: 'File',
-        submenu: [
-            {
-                label: 'Quit',
-                click: () => app.quit()
-            }
-        ]
-    }
+        role: 'fileMenu'
+    },
+    ...(!isMac ? [
+        {
+            label: 'Help',
+            submenu: [
+                {
+                    label: 'About',
+                    click: createAboutWindow
+                },
+            ],
+        },
+    ]: []),
+    ...(isDev ? [
+        {
+            label: 'Developer',
+            submenu: [
+                { role: 'reload' },
+                { role: 'forcereload' },
+                { type: 'separator' },
+                { role: 'toggledevtools' },
+                
+            ]
+        }
+    ] : [])
 ]
 
